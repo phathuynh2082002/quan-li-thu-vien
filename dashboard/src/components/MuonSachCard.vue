@@ -21,9 +21,8 @@
       {{ muonSach.ngayTra }}
     </div>
     <div class="p-1">
-      <strong>Đã phê duyệt:</strong>
-      <span v-if="muonSach.pheDuyet" style="color: green">&#10003;</span>
-      <span v-else style="color: red">&#10007;</span>
+      <strong>Trạng thái:</strong>
+      {{ translatedTrangThai }}
     </div>
   </div>
 </template>
@@ -48,25 +47,51 @@ export default {
       tenNhanVien: ''
     };
   },
+  computed: {
+    translatedTrangThai() {
+      const statusMap = {
+        choPheDuyet: 'Chờ phê duyệt',
+        daPheDuyet: 'Đã phê duyệt',
+        daMuon: 'Đã mượn',
+        daTra: 'Đã trả'
+      };
+      return statusMap[this.muonSach.trangThai] || 'Unknown';
+    }
+  },
   async created() {
-    const sach = await sachService.get(this.muonSach.maSach);
-    if (sach) {
-      this.tenSach = sach.tenSach;
+    this.loadMuonSachData();
+  },
+  watch: {
+    muonSach: {
+      handler() {
+        this.loadMuonSachData();
+      },
+      deep: true
     }
+  },
+  methods: {
+    async loadMuonSachData() {
+      const sach = await sachService.get(this.muonSach.maSach);
+      if (sach) {
+        this.tenSach = sach.tenSach;
+      }
 
-    const docGia = await docGiaService.get(this.muonSach.maDocGia);
-    if (docGia) {
-      this.tenDocGia = `${docGia.hoLot} ${docGia.ten}`;
-    }
+      const docGia = await docGiaService.get(this.muonSach.maDocGia);
+      if (docGia) {
+        this.tenDocGia = `${docGia.hoLot} ${docGia.ten}`;
+      }
 
-    if (this.muonSach.maNhanVien) {
-      const nhanVien = await nhanVienService.get(this.muonSach.maNhanVien);
-      if (nhanVien) {
-        this.tenNhanVien = nhanVien.hoTenNV;
+      if (this.muonSach.maNhanVien) {
+        const nhanVien = await nhanVienService.get(this.muonSach.maNhanVien);
+        if (nhanVien) {
+          this.tenNhanVien = nhanVien.hoTenNV;
+        }
       }
     }
   }
 };
+
+
 </script>
 
 <style scoped>

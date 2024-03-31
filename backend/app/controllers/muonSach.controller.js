@@ -62,18 +62,18 @@ exports.findOne = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   const { id } = req.params;
-  const { maNhanVien } = req.body;
+  const { maNhanVien, trangThai } = req.body;
   if (!req.body?.maNhanVien) {
     return next(new ApiError(400, "Mã nhân viên không được để trống"));
   }
 
   try {
     const muonSachService = new MuonSachService(MongoDB.client);
-    const document = await muonSachService.update(id, maNhanVien);
+    const document = await muonSachService.update(id, maNhanVien, trangThai);
     if (!document) {
       return next(new ApiError(404, "Không tìm thấy thông tin mượn sách"));
     }
-    return res.send({ message: "Mượn sách đã được phê duyệt thành công" });
+    return res.send({ message: "Mượn sách đã cập nhật thành công" });
   } catch (error) {
     return next(
       new ApiError(

@@ -22,10 +22,7 @@ class MuonSachService {
   }
 
   async update(id, data) {
-    const Jsondata = {
-      maNhanVien : data
-    }
-    return (await this.api.put(`/${id}`, Jsondata)).data;
+    return (await this.api.put(`/${id}`, data)).data;
   }
 
   async delete(id) {

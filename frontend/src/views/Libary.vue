@@ -27,16 +27,10 @@
           <i class="fas fa-address-card"></i>
         </h4>
         <SachCard :sach="activeSach" />
-        <router-link
-          :to="{
-            name: 'sach.muon',
-            params: { id: activeSach._id },
-          }"
-        >
-          <span class="mt-2 badge badge-warning">
-            <i class="fas fa-edit"></i> Mượn Sách </span
-          >
+        <router-link v-if="activeSach.soQuyen > 0" :to="{ name: 'sach.muon', params: { id: activeSach._id }}">
+          <span class="mt-2 badge badge-warning"><i class="fas fa-edit"></i> Mượn Sách</span>
         </router-link>
+        <p v-else>Không thể mượn sách do hết quyển.</p>
       </div>
     </div>
   </div>

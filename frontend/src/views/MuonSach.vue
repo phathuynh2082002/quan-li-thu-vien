@@ -8,10 +8,23 @@
         Mượn Sách
         <i class="fa-solid fa-book"></i>
       </h4>
+      <!-- Dropdown để lọc danh sách -->
+      <div class="form-group">
+        <label for="filterSelect">Bộ lọc:</label>
+        <select class="form-control" id="filterSelect" @change="filterMuonSachs($event.target.value)">
+          <option value="">Tất cả</option>
+          <option value="choPheDuyet">Chờ phê duyệt</option>
+          <option value="daPheDuyet">Đã phê duyệt</option>
+          <option value="daMuon">Đã mượn</option>
+          <option value="daTra">Đã trả</option>
+        </select>
+      </div>
+      <!-- Danh sách mượn sách -->
       <MuonSachList v-if="filteredMuonSachsCount > 0" :muonSachs="filteredMuonSachs" v-model:activeIndex="activeIndex" />
       <p v-else>Không có lượt mượn sách nào.</p>
     </div>
     <div class="mt-3 col-md-6">
+      <!-- Chi tiết mượn sách -->
       <div v-if="activeMuonSach">
         <h4>
           Theo dõi mượn sách
@@ -37,7 +50,8 @@ export default {
   },
   data() {
     return {
-      muonSachs: [],
+      muonSachs: [], // Danh sách gốc
+      filteredMuonSachs: [], // Danh sách lọc
       activeIndex: -1,
       searchText: "",
     };
@@ -48,35 +62,43 @@ export default {
     },
   },
   computed: {
+    // Tính toán chuỗi dùng để tìm kiếm
     muonSachStrings() {
       return this.muonSachs.map((muonSach) => {
         const { maSach, maDocGia, maNhanVien, ngayMuon, ngayTra, pheDuyet } = muonSach;
         return [maSach, maDocGia, maNhanVien, ngayMuon, ngayTra, pheDuyet].join("");
       });
     },
-    filteredMuonSachs() {
-      if (!this.searchText) return this.muonSachs;
-      return this.muonSachs.filter((_muonSach, index) =>
-        this.muonSachStrings[index].includes(this.searchText)
-      );
+    // Số lượng mượn sách sau khi lọc
+    filteredMuonSachsCount() {
+      return this.filteredMuonSachs.length;
     },
+    // Mượn sách được chọn
     activeMuonSach() {
       if (this.activeIndex < 0) return null;
       return this.filteredMuonSachs[this.activeIndex];
     },
-    filteredMuonSachsCount() {
-      return this.filteredMuonSachs.length;
-    },
   },
   methods: {
+    // Lọc danh sách mượn sách dựa trên trạng thái
+    filterMuonSachs(trangThai) {
+      if (trangThai === '') {
+        this.filteredMuonSachs = [...this.muonSachs]; // Lấy lại toàn bộ danh sách nếu chọn 'Tất cả'
+      } else {
+        this.filteredMuonSachs = this.muonSachs.filter(muonSach => muonSach.trangThai === trangThai);
+      }
+    },
+    // Lấy danh sách mượn sách từ API
     async retrieveMuonSachs() {
       try {
         const maDocGia = localStorage.getItem('id_docGia');
         this.muonSachs = await muonSachService.getMuonSach(maDocGia);
+        this.filteredMuonSachs = [...this.muonSachs]; // Tạo một bản sao của danh sách gốc
       } catch (error) {
         console.log(error);
       }
     },
+    // Làm mới danh sách mượn sách
     refreshList() {
       this.retrieveMuonSachs();
       this.activeIndex = -1;
